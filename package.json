@@ -9,7 +9,9 @@
   },
   "_moduleAliases": {
     "helpers": "build/helpers",
-    "bot": "build/bot"
+    "bot": "build/bot",
+    "config": "build/config",
+    "db":"build/db"
   },
   "dependencies": {
     "dotenv": "^16.0.3",
