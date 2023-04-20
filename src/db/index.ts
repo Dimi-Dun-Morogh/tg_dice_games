@@ -1,9 +1,9 @@
-import logger from "helpers/logger";
-import mongoose from "mongoose";
-import config from "config/";
-import GameCollection, { Game } from "db/models";
+import logger from 'helpers/logger';
+import mongoose from 'mongoose';
+import config from 'config/';
+import GameCollection, { Game } from 'db/models';
 
-const NAMESPACE = "db/index";
+const NAMESPACE = 'db/index';
 
 class GameDb {
   async connectDb() {
@@ -17,7 +17,11 @@ class GameDb {
 
   async createGame(gameObj: Game) {
     try {
-      await GameCollection.create(gameObj);
+      // тут прочекать сколько минут назад была создана игра или был последний ход
+      const ifExists = await this.readGame(gameObj.chat_id);
+      if (ifExists) return false;
+      const data = await GameCollection.create(gameObj);
+      return data;
     } catch (error) {
       logger.error(NAMESPACE, error);
     }

@@ -1,18 +1,16 @@
-import 'module-alias/register';
-import logger from 'helpers/logger';
-import bot from 'bot/bot';
-import gameDb from 'db/index';
+import logger from "helpers/logger";
+import bot from "bot/bot";
+import gameDb from "db/index";
 
-const NAMESPACE = 'app.ts';
+const NAMESPACE = "app.ts";
 
 gameDb
   .connectDb()
   .then(() => {
-    logger.info(NAMESPACE, 'connect db success');
+    logger.info(NAMESPACE, "connect db success");
 
     bot
       .launch()
-      .then(() => logger.info(NAMESPACE, 'bot upp and running in polling'))
-      .catch((err) => console.log(err));
+      .then(() => logger.info(NAMESPACE, "bot upp and running in polling"));
   })
   .catch((err) => logger.error(NAMESPACE, err));
