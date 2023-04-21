@@ -1,4 +1,4 @@
-import config from "../config/";
+import config from "config/";
 import { Telegraf } from "telegraf";
 import { dartsStart, playerAccept, playerThrow } from "./handlers/darts";
 

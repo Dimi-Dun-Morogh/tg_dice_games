@@ -13,7 +13,6 @@ export type Game = {
   gameType: string;
   date: number;
   whosTurn: number;
-  score: number;
 };
 
 export interface GameModel extends Game, Document {}
@@ -31,7 +30,6 @@ export const gameSchema = new mongoose.Schema({
   gameType: String,
   date: Number,
   whosTurn: Number,
-  score: Number,
 });
 
 export default mongoose.model<GameModel>('Game', gameSchema);
