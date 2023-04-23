@@ -1,7 +1,12 @@
 import logger from 'helpers/logger';
 import mongoose from 'mongoose';
 import config from 'config/';
-import GameCollection, { Game } from 'db/models';
+import GameCollection, {
+  Game,
+  Player,
+  PlayerRating,
+  PlayerRatingM,
+} from 'db/models';
 
 const NAMESPACE = 'db/index';
 
@@ -52,6 +57,30 @@ class GameDb {
         chat_id: chatId,
       });
       return deleted;
+    } catch (error) {
+      logger.error(NAMESPACE, error);
+    }
+  }
+
+  async updateRating(chatId: number, data: PlayerRating) {
+    try {
+      const { p_id, chat_id, score, userLink } = data;
+      const updated = await PlayerRatingM.findOneAndUpdate(
+        { chat_id: chatId, p_id: data.p_id },
+        { p_id, chat_id, score, userLink },
+        { upsert: true },
+      );
+      console.log(updated, 'data was\n\n', data);
+      return updated;
+    } catch (error) {
+      logger.error(NAMESPACE, 'updateRating', error);
+    }
+  }
+
+  async getChatRating(chatId: number) {
+    try {
+      const data = await PlayerRatingM.find({ chat_id: chatId });
+      return data;
     } catch (error) {
       logger.error(NAMESPACE, error);
     }

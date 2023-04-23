@@ -1,10 +1,17 @@
-import { Player } from 'db/models';
+import { Player, PlayerRating } from 'db/models';
 
 export type playerIdName = {
   id: number;
   name: string;
 };
 class RenderMsgs {
+  public stickers = {
+    epic: 'CAACAgIAAx0CUGm1aQACB2lkQrInpjyWpm6Y-vnDKq378lhgpQAC2RkAAgbQkEmprOA-tNeEZC8E',
+    failed:
+      'CAACAgIAAx0CUGm1aQACB2xkQrNIMwWZU13AnB9xY1CERSDBJwAClgEAArSASiR6X6ArgMZHKC8E',
+    shha: 'CAACAgIAAx0CUGm1aQACB39kQrkCx7QE3xa6q8ExvvLwMFUIEQACsQMAAnwFBxuoP-HWtbcv5i8E',
+  };
+
   userLink(id: string | number, name: string) {
     return `<a href="tg://user?id=${id}"><b>${name}</b></a>`;
   }
@@ -32,6 +39,17 @@ class RenderMsgs {
 
   dartsWinnerMsg(pl: Player) {
     return `${pl.userLink} ВЫИГРЫВАЕТ СО СЧЕТОМ ${pl.score}`;
+  }
+
+  ratingMsg(pr: Array<PlayerRating>) {
+    let str = 'Рейтинг игроков в дартс🎯🎯🎯 в этом чате:\n';
+    const sorted = [...pr].sort((a, b) => a.score - b.score);
+    for (let i = 0; i < sorted.length; i++) {
+      const {userLink, score} = sorted[i]
+      if(i>=10) break;
+      str+=`\n${userLink} - ${score}`
+    }
+    return str;
   }
 }
 

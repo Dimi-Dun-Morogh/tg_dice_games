@@ -10,8 +10,9 @@ bot.action(/playeraccept_(.+)/, (ctx) => playerAccept(ctx));
 
 bot.action(/playerthrow_(.+)/, (ctx) => playerThrow(ctx));
 
-bot.on("message", (ctx) => {
-  // console.log(ctx.message)
-});
+// bot.on("message", (ctx) => {
+//    console.log(ctx.message)
+//    ctx.sendSticker('CAACAgIAAx0CUGm1aQACB2lkQrInpjyWpm6Y-vnDKq378lhgpQAC2RkAAgbQkEmprOA-tNeEZC8E')
+// });
 
 export default bot;

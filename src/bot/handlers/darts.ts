@@ -4,6 +4,7 @@ import renderMsgs, { playerIdName } from 'bot/helpers/renderMsgs';
 import darts from 'bot/helpers/game';
 import { Game, Player } from 'db/models';
 import gameDb from 'db/index';
+import { waiter } from 'helpers/utils';
 
 const NAMESPACE = 'handlers_darts';
 
@@ -40,6 +41,8 @@ export const dartsStart = async (ctx: Context) => {
           'похоже уже кто-то начал игру, ждите окончания или пока не пройдет 2 минуты с последнего хода',
         );
         return;
+      } else {
+        await gameDb.deleteGame(ctx.chat!.id!);
       }
     }
 
@@ -157,8 +160,17 @@ export const playerThrow = async (ctx: Context) => {
     if (sendersId !== +buttonOwner)
       return await ctx.answerCbQuery('не для тебя');
     //throw dice
-    const res = (await ctx.sendDice({ emoji: '🎯' })).dice;
+    const dice = await ctx.sendDice({
+      emoji: '🎯',
+      disable_notification: true,
+    });
+
+    waiter(5000).then(()=>ctx.deleteMessage(dice.message_id));
+
+    const res = dice.dice;
+
     await ctx.deleteMessage();
+    await waiter(700);
     await ctx.answerCbQuery(`${userLink} выбрасывает ${res}!`);
 
     // update players result
@@ -168,8 +180,11 @@ export const playerThrow = async (ctx: Context) => {
     });
 
     // update whosTurn
+
+    const bonused = await darts.bonusPoints(ctx, updatedPlayers, id);
+    game.players = bonused!;
     game.whosTurn = game.whosTurn === 1 ? 0 : 1;
-    game.players = updatedPlayers;
+
     game.date = Number(new Date());
     //  record the results
     await gameDb.updateGame(chat.id, game);
@@ -179,15 +194,14 @@ export const playerThrow = async (ctx: Context) => {
       whosTurn!.userLink,
       game.players,
     );
+    await waiter(700);
     await ctx
       .replyWithHTML(roundMsg)
       .catch((err) => logger.error(NAMESPACE, err));
     //! get a check if there is a winner
     const winner = darts.isThereWinner(game);
     if (winner) {
-      await ctx.replyWithHTML(renderMsgs.dartsWinnerMsg(winner));
-      //delete game
-      await gameDb.deleteGame(game.chat_id);
+      await darts.gameEnd(ctx, game, winner);
     } else {
       // pop msgForNextThrow
       await msgForNextThrow(ctx);
