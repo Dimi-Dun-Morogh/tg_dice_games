@@ -1,4 +1,4 @@
-import { Player, PlayerRating } from 'db/models';
+import { Player, PlayerRating } from "db/models";
 
 export type playerIdName = {
   id: number;
@@ -6,10 +6,10 @@ export type playerIdName = {
 };
 class RenderMsgs {
   public stickers = {
-    epic: 'CAACAgIAAx0CUGm1aQACB2lkQrInpjyWpm6Y-vnDKq378lhgpQAC2RkAAgbQkEmprOA-tNeEZC8E',
+    epic: "CAACAgIAAx0CUGm1aQACB2lkQrInpjyWpm6Y-vnDKq378lhgpQAC2RkAAgbQkEmprOA-tNeEZC8E",
     failed:
-      'CAACAgIAAx0CUGm1aQACB2xkQrNIMwWZU13AnB9xY1CERSDBJwAClgEAArSASiR6X6ArgMZHKC8E',
-    shha: 'CAACAgIAAx0CUGm1aQACB39kQrkCx7QE3xa6q8ExvvLwMFUIEQACsQMAAnwFBxuoP-HWtbcv5i8E',
+      "CAACAgIAAx0CUGm1aQACB2xkQrNIMwWZU13AnB9xY1CERSDBJwAClgEAArSASiR6X6ArgMZHKC8E",
+    shha: "CAACAgIAAx0CUGm1aQACB39kQrkCx7QE3xa6q8ExvvLwMFUIEQACsQMAAnwFBxuoP-HWtbcv5i8E",
   };
 
   userLink(id: string | number, name: string) {
@@ -19,7 +19,7 @@ class RenderMsgs {
   dartsStartMsg(playerA: playerIdName, playerB: playerIdName | string) {
     const link1 = this.userLink(playerA.id, playerA.name);
     const link2 =
-      typeof playerB === 'string'
+      typeof playerB === "string"
         ? playerB
         : this.userLink(playerB.id, playerB.name);
     return `${link1} Вызывает на игру в дартс🎯${link2}`;
@@ -31,7 +31,7 @@ class RenderMsgs {
 
   dartsRoundResult(res: number, link: string, players: Array<Player>) {
     const header = `${link}  ВЫБРАСЫВАЕТ ${res}\n\n`;
-    let footer = 'РЕЗУЛЬТАТЫ:\n';
+    let footer = "РЕЗУЛЬТАТЫ:\n";
     players.forEach((el) => (footer += `${el.userLink} - ${el.score}\n`));
 
     return header + footer;
@@ -42,12 +42,12 @@ class RenderMsgs {
   }
 
   ratingMsg(pr: Array<PlayerRating>) {
-    let str = 'Рейтинг игроков в дартс🎯🎯🎯 в этом чате:\n';
+    let str = "Рейтинг игроков в дартс🎯🎯🎯 в этом чате:\n";
     const sorted = [...pr].sort((a, b) => a.score - b.score);
     for (let i = 0; i < sorted.length; i++) {
-      const {userLink, score} = sorted[i]
-      if(i>=10) break;
-      str+=`\n${userLink} - ${score}`
+      const { userLink, score } = sorted[i];
+      if (i >= 10) break;
+      str += `\n${userLink} - ${score}`;
     }
     return str;
   }

@@ -1,19 +1,21 @@
 {
   "name": "tg_dice",
   "scripts": {
-    "build": "rm -rf build/ && prettier --write src/ && tsc",
-    "start": "node -r ./tsconfig-paths.js build/app.js",
+    "build": "rm -rf build/ && prettier --write src/ && tsc && tsc-alias",
+    "start": "node  build/app.js",
     "dev": "npx nodemon ./src/app.ts",
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix"
   },
   "dependencies": {
     "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "mongoose": "^7.0.3",
     "telegraf": "^4.12.2",
     "typescript-transform-paths": "^3.4.6"
   },
   "devDependencies": {
+    "@types/express": "^4.17.17",
     "@types/node": "^18.15.11",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
     "@typescript-eslint/parser": "^5.58.0",
@@ -27,6 +29,7 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.7",
     "ts-node": "^10.9.1",
+    "tsc-alias": "^1.8.5",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.0.4"
   }

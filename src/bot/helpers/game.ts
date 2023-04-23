@@ -45,7 +45,7 @@ class Darts {
             p_id: toAdd.id,
             score: addTo.score + toAdd.score,
           });
-          console.log('summin old rating')
+          console.log('summin old rating');
         } else {
           await gameDb.updateRating(chat_id, {
             p_id: toAdd.id,
@@ -53,7 +53,7 @@ class Darts {
             chat_id,
             userLink: toAdd.userLink,
           });
-          console.log('writing new rating')
+          console.log('writing new rating');
         }
       }
     } catch (error) {
@@ -69,32 +69,31 @@ class Darts {
     try {
       const randomNum = Math.floor(Math.random() * 11);
       const currentPlayer = players.find((el) => el.id == whosTurn);
-      if (!currentPlayer) return players;
+
       let amount = 0;
+      let msg = '';
+      if (!currentPlayer) return { updated: players, msg };
 
       switch (randomNum) {
         case 10:
           amount = 5;
-          await ctx.replyWithHTML(
-            `сегодня в магазин завезли яшик конга, ${currentPlayer.userLink} получает бонусные ${amount} очков`,
-          );
-          await waiter(300);
+          msg = `сегодня в магазин завезли яшик конга, ${currentPlayer.userLink} получает бонусные ${amount} очков`;
+
+          await waiter(1000);
           await ctx.sendSticker(renderMsgs.stickers.epic);
           break;
         case 4:
           amount = -1;
-          await ctx.replyWithHTML(
-            `В бар залетает Артур и ломает телевизор, ${currentPlayer.userLink} теряет ${amount} очков`,
-          );
-          await waiter(300);
+          msg = `В бар залетает Артур и ломает телевизор, ${currentPlayer.userLink} теряет ${amount} очков`;
+
+          await waiter(1000);
           await ctx.sendSticker(renderMsgs.stickers.shha);
           break;
         case 3:
           amount = -3;
-          await ctx.replyWithHTML(
-            `${currentPlayer.userLink} подскользнулся и упал на бутылку голда, он теряет ${amount} очков`,
-          );
-          await waiter(300);
+          msg = `${currentPlayer.userLink} подскользнулся и упал на бутылку голда, он теряет ${amount} очков`;
+
+          await waiter(1000);
           await ctx.sendSticker(renderMsgs.stickers.failed);
           break;
         default:
@@ -107,7 +106,7 @@ class Darts {
         return el;
       });
 
-      return updated;
+      return { updated, msg } as { updated: Array<Player>; msg: string };
     } catch (error) {
       logger.error(this.namespace, 'bonusPoints', error);
     }
@@ -115,19 +114,22 @@ class Darts {
 
   static async gameEnd(ctx: Context, game: Game, winner: Player) {
     try {
-      await waiter(700);
-      await ctx.replyWithHTML(renderMsgs.dartsWinnerMsg(winner));
-      await waiter(700);
+      await waiter(500);
+
       await this.updateRatings(game);
 
       //delete game
       await gameDb.deleteGame(game.chat_id);
       const rating = await gameDb.getChatRating(game.chat_id);
 
-      if(!rating) return;
+      if (!rating) return;
 
       const mapped = rating.map((el) => el);
-      await ctx.replyWithHTML(renderMsgs.ratingMsg(mapped));
+      await ctx.replyWithHTML(
+        renderMsgs.dartsWinnerMsg(winner) +
+          '\n\n' +
+          renderMsgs.ratingMsg(mapped),
+      );
     } catch (error) {
       logger.error(this.namespace, 'gameEnd', error);
     }

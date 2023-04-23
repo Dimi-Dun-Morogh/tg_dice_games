@@ -64,7 +64,7 @@ export const dartsStart = async (ctx: Context) => {
   }
 };
 
-export const msgForNextThrow = async (ctx: Context) => {
+export const msgForNextThrow = async (ctx: Context, extraMsg?: string) => {
   try {
     //get a game
     //gen a msg with btn
@@ -82,7 +82,7 @@ export const msgForNextThrow = async (ctx: Context) => {
       [Markup.button.callback('БРОСИТЬ🎯', `playerthrow_${id}`)],
     ]);
 
-    await ctx.replyWithHTML(msg, keyboard);
+    await ctx.replyWithHTML(extraMsg + '\n\n' + msg, keyboard);
   } catch (error) {
     logger.error(NAMESPACE, 'msgForNextThrow', error);
   }
@@ -156,6 +156,9 @@ export const playerThrow = async (ctx: Context) => {
 
     const buttonOwner = ctx.callbackQuery.data.split('_')[1];
     console.log(sendersId, buttonOwner);
+    const senderProfile = game.players.find((el) => el.id == sendersId);
+    if (senderProfile && senderProfile.id !== whosTurn?.id)
+      return await ctx.answerCbQuery('не для тебя');
 
     if (sendersId !== +buttonOwner)
       return await ctx.answerCbQuery('не для тебя');
@@ -165,13 +168,13 @@ export const playerThrow = async (ctx: Context) => {
       disable_notification: true,
     });
 
-    waiter(5000).then(()=>ctx.deleteMessage(dice.message_id));
+    waiter(5000).then(() => ctx.deleteMessage(dice.message_id));
 
     const res = dice.dice;
 
-    await ctx.deleteMessage();
-    await waiter(700);
-    await ctx.answerCbQuery(`${userLink} выбрасывает ${res}!`);
+    //  await ctx.deleteMessage();
+    await waiter(50);
+    // await ctx.replyWithHTML(`${userLink} выбрасывает ${res.value}!`);
 
     // update players result
     const updatedPlayers = game.players.map((el) => {
@@ -182,7 +185,11 @@ export const playerThrow = async (ctx: Context) => {
     // update whosTurn
 
     const bonused = await darts.bonusPoints(ctx, updatedPlayers, id);
-    game.players = bonused!;
+    // const {updated, msg} = bonused!;
+
+    if (!bonused) return;
+
+    game.players = bonused.updated;
     game.whosTurn = game.whosTurn === 1 ? 0 : 1;
 
     game.date = Number(new Date());
@@ -194,17 +201,21 @@ export const playerThrow = async (ctx: Context) => {
       whosTurn!.userLink,
       game.players,
     );
-    await waiter(700);
-    await ctx
-      .replyWithHTML(roundMsg)
-      .catch((err) => logger.error(NAMESPACE, err));
+    await waiter(100);
+
     //! get a check if there is a winner
     const winner = darts.isThereWinner(game);
     if (winner) {
+      await ctx
+        .replyWithHTML(roundMsg)
+        .catch((err) => logger.error(NAMESPACE, err));
       await darts.gameEnd(ctx, game, winner);
     } else {
       // pop msgForNextThrow
-      await msgForNextThrow(ctx);
+
+      await waiter(700);
+      await msgForNextThrow(ctx, bonused.msg + '\n' + roundMsg);
+      await ctx.deleteMessage();
     }
   } catch (error) {
     logger.error(NAMESPACE, 'playerThrow', error);

@@ -1,4 +1,4 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document } from "mongoose";
 
 export type Player = {
   id: number;
@@ -32,9 +32,10 @@ const playyerRatingSchema = new mongoose.Schema({
   chat_id: Number,
 });
 
-
-export  const PlayerRatingM = mongoose.model<PlayerRatingModel>('PlayerRating', playyerRatingSchema);
-
+export const PlayerRatingM = mongoose.model<PlayerRatingModel>(
+  "PlayerRating",
+  playyerRatingSchema
+);
 
 export interface GameModel extends Game, Document {}
 
@@ -53,4 +54,4 @@ export const gameSchema = new mongoose.Schema({
   whosTurn: Number,
 });
 
-export default mongoose.model<GameModel>('Game', gameSchema);
+export default mongoose.model<GameModel>("Game", gameSchema);
