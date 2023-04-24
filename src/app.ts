@@ -26,26 +26,16 @@ gameDb
             port: +process.env.PORT! || 8000
         }
       }).then(() => {
-        console.info(`The bot ${bot?.botInfo?.username} is running on server`);
+        logger.info(NAMESPACE,`The bot ${bot?.botInfo?.username} is running on server`);
       });
       app.use(express.json());
       app.use(bot.webhookCallback('/' + config.botApiKey));
-      // app.use(express.json());
-      // await bot.telegram.setWebhook(process.env.WEBHOOK_URL!);
-      // app.use(bot.webhookCallback("/" + config.botApiKey));
 
-      // bot.telegram.webhookReply = false;
-      // console.log(
-      //   "webhook url - ",
-      //   process.env.WEBHOOK_URL! + config.botApiKey,
-      //   "\n",
-      //   `PORT IS ${process.env.PORT}`
-      // );
-      console.log("running webhook mode");
+
     } else {
       bot
         .launch()
-        .then(() => logger.info(NAMESPACE, "bot upp and running in polling"));
+        .then(() => logger.info(NAMESPACE, `The bot ${bot?.botInfo?.username} is running in polling mode`));
     }
   })
   .catch((err) => logger.error(NAMESPACE, err));

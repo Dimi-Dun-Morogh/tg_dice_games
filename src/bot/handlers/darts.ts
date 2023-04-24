@@ -10,12 +10,11 @@ const NAMESPACE = 'handlers_darts';
 
 export const dartsStart = async (ctx: Context) => {
   try {
-    //console.log(ctx);
     if (!('text' in ctx.message!)) return;
     const { from } = ctx.message;
 
     if (!ctx.message.entities) return; //!might give some msg here
-    console.log(ctx.message);
+
     let playerB: playerIdName | string;
 
     if (
@@ -151,7 +150,7 @@ export const playerThrow = async (ctx: Context) => {
     //get current plaeyr
 
     const whosTurn = game.players.find((el) => el.playerNum == game.whosTurn);
-    const { id, userLink } = whosTurn!;
+    const { id } = whosTurn!;
     const sendersId = ctx.from?.id;
 
     const buttonOwner = ctx.callbackQuery.data.split('_')[1];
@@ -172,9 +171,7 @@ export const playerThrow = async (ctx: Context) => {
 
     const res = dice.dice;
 
-    //  await ctx.deleteMessage();
     await waiter(50);
-    // await ctx.replyWithHTML(`${userLink} выбрасывает ${res.value}!`);
 
     // update players result
     const updatedPlayers = game.players.map((el) => {
@@ -185,7 +182,6 @@ export const playerThrow = async (ctx: Context) => {
     // update whosTurn
 
     const bonused = await darts.bonusPoints(ctx, updatedPlayers, id);
-    // const {updated, msg} = bonused!;
 
     if (!bonused) return;
 
