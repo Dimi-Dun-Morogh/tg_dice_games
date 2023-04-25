@@ -63,7 +63,7 @@ export const dartsStart = async (ctx: Context) => {
   }
 };
 
-export const msgForNextThrow = async (ctx: Context, extraMsg?: string) => {
+export const msgForNextThrow = async (ctx: Context, extraMsg = '') => {
   try {
     //get a game
     //gen a msg with btn
