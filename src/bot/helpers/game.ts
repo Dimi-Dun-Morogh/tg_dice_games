@@ -72,29 +72,25 @@ class Darts {
 
       let amount = 0;
       let msg = '';
+      let sticker;
+
       if (!currentPlayer) return { updated: players, msg };
 
       switch (randomNum) {
         case 10:
           amount = 5;
+          sticker = renderMsgs.stickers.epic;
           msg = `сегодня в магазин завезли яшик конга, ${currentPlayer.userLink} получает бонусные ${amount} очков`;
-
-          await waiter(1000);
-          await ctx.sendSticker(renderMsgs.stickers.epic);
           break;
         case 4:
           amount = -1;
+          sticker = renderMsgs.stickers.shha;
           msg = `В бар залетает Артур и ломает телевизор, ${currentPlayer.userLink} теряет ${amount} очков`;
-
-          await waiter(1000);
-          await ctx.sendSticker(renderMsgs.stickers.shha);
           break;
         case 3:
           amount = -3;
+          sticker = renderMsgs.stickers.failed;
           msg = `${currentPlayer.userLink} подскользнулся и упал на бутылку голда, он теряет ${amount} очков`;
-
-          await waiter(1000);
-          await ctx.sendSticker(renderMsgs.stickers.failed);
           break;
         default:
           break;
@@ -105,6 +101,12 @@ class Darts {
         if (el.id === currentPlayer.id) el.score += amount;
         return el;
       });
+      if(sticker) {
+        await waiter(1000);
+        ctx.sendSticker(sticker).then(({message_id})=>{
+          setTimeout(()=>ctx.deleteMessage(message_id),5000)
+        })
+      }
 
       return { updated, msg } as { updated: Array<Player>; msg: string };
     } catch (error) {
