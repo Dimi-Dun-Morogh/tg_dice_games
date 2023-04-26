@@ -53,4 +53,4 @@ class RenderMsgs {
   }
 }
 
-export default  RenderMsgs;
+export default RenderMsgs;

@@ -43,7 +43,7 @@ class GameDb {
 
   async updateGame(id: number, data: Game) {
     try {
-      console.log('updating data', data.players)
+      console.log("updating data", data.players);
       await GameCollection.updateOne({ chat_id: id }, data, { upsert: true });
       const gameUpdated = await GameCollection.findOne({ chat_id: id });
       return gameUpdated;

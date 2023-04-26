@@ -1,12 +1,13 @@
-import gameDb from 'db/index';
-import { Game, Player } from 'db/models';
-import logger from 'helpers/logger';
-import { waiter } from 'helpers/utils';
-import { Context } from 'telegraf';
-import renderMsgs from './renderMsgs';
+import config from "config/";
+import gameDb from "db/index";
+import { Game, Player } from "db/models";
+import logger from "helpers/logger";
+import { waiter } from "helpers/utils";
+import { Context } from "telegraf";
+import renderMsgs from "./renderMsgs";
 
 class Darts {
-  private static namespace = 'helpers/darts';
+  private static namespace = "helpers/darts";
 
   static isThereWinner(game: Game) {
     try {
@@ -16,7 +17,7 @@ class Darts {
 
       return winner;
     } catch (error) {
-      logger.error(this.namespace, 'isThereWinner', error);
+      logger.error(this.namespace, "isThereWinner", error);
     }
   }
 
@@ -26,7 +27,7 @@ class Darts {
       const minutes = Math.floor(diff / 1000 / 60);
       return minutes >= 2;
     } catch (error) {
-      logger.error(this.namespace, 'gameOldEnough', error);
+      logger.error(this.namespace, "gameOldEnough", error);
     }
   }
 
@@ -45,7 +46,7 @@ class Darts {
             p_id: toAdd.id,
             score: addTo.score + toAdd.score,
           });
-          console.log('summin old rating');
+          console.log("summin old rating");
         } else {
           await gameDb.updateRating(chat_id, {
             p_id: toAdd.id,
@@ -53,25 +54,25 @@ class Darts {
             chat_id,
             userLink: toAdd.userLink,
           });
-          console.log('writing new rating');
+          console.log("writing new rating");
         }
       }
     } catch (error) {
-      logger.error(this.namespace, 'updateRatings', error);
+      logger.error(this.namespace, "updateRatings", error);
     }
   }
 
   static async bonusPoints(
     ctx: Context,
     players: Array<Player>,
-    whosTurn: number,
+    whosTurn: number
   ) {
     try {
       const randomNum = Math.floor(Math.random() * 11);
       const currentPlayer = players.find((el) => el.id == whosTurn);
 
       let amount = 0;
-      let msg = '';
+      let msg = "";
       let sticker;
 
       if (!currentPlayer) return { updated: players, msg };
@@ -101,16 +102,19 @@ class Darts {
         if (el.id === currentPlayer.id) el.score += amount;
         return el;
       });
-      if(sticker) {
+      if (sticker) {
         await waiter(1000);
-        ctx.sendSticker(sticker).then(({message_id})=>{
-          setTimeout(()=>ctx.deleteMessage(message_id),5000)
-        })
+        const { message_id, chat } = await ctx.sendSticker(sticker);
+
+        fetch(`${config.appUrl}/web/${chat.id}__${message_id}`, {
+          method: "DELETE",
+          mode: "same-origin",
+        });
       }
 
       return { updated, msg } as { updated: Array<Player>; msg: string };
     } catch (error) {
-      logger.error(this.namespace, 'bonusPoints', error);
+      logger.error(this.namespace, "bonusPoints", error);
     }
   }
 
@@ -129,11 +133,11 @@ class Darts {
       const mapped = rating.map((el) => el);
       await ctx.replyWithHTML(
         renderMsgs.dartsWinnerMsg(winner) +
-          '\n\n' +
-          renderMsgs.ratingMsg(mapped),
+          "\n\n" +
+          renderMsgs.ratingMsg(mapped)
       );
     } catch (error) {
-      logger.error(this.namespace, 'gameEnd', error);
+      logger.error(this.namespace, "gameEnd", error);
     }
   }
 }

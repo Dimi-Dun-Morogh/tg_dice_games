@@ -1,42 +1,82 @@
-import express, {Request, Response} from "express";
-import logger from "helpers/logger";
-import bot from "bot/bot";
-import gameDb from "db/index";
+import express, { Request, Response } from 'express';
+import logger from 'helpers/logger';
+import bot from 'bot/bot';
+import gameDb from 'db/index';
 import * as dotenv from 'dotenv';
 dotenv.config();
-import config from "./config";
+import config from './config';
+import { waiter } from 'helpers/utils';
+import cors from 'cors';
 
-const NAMESPACE = "app.ts";
+const NAMESPACE = 'app.ts';
 
 const app = express();
 
-app.get('/', (request: Request, response: Response) => {
-  logger.info(NAMESPACE, `${Date.now()} Ping Received, ${process.env.NODE_ENV}`);
-  response.sendStatus(200);
+const router = express.Router();
+
+router.get('/', (request: Request, response: Response) => {
+  try {
+    logger.info(
+      NAMESPACE,
+      `${Date.now()} Ping Received, ${process.env.NODE_ENV}`,
+    );
+    response.sendStatus(200);
+  } catch (error) {
+    logger.error(NAMESPACE, error);
+  }
 });
 
-gameDb
-  .connectDb()
-  .then(async () => {
-    logger.info(NAMESPACE, "connect db success");
-    if (process.env.NODE_ENV === "production") {
-      bot.launch({
-        webhook:{
-            domain: process.env.WEBHOOK_URL!,// Your domain URL (where server code will be deployed)
-            port: +process.env.PORT! || 8000
-        }
-      }).then(() => {
-        logger.info(NAMESPACE,`The bot ${bot?.botInfo?.username} is running on server`);
-      });
+router.delete('/:id', async (request: Request, response: Response) => {
+  try {
+    const { id } = request.params; //xxx__yyy  -  xxx - chat id; yyy - message id;
+    const [chatId, messageId] = id.split('__');
+    await waiter(5000);
+    const data = await bot.telegram.deleteMessage(chatId, +messageId);
+
+    console.log(chatId, messageId, 'delete msg');
+    response.status(200).send(`${id} ${data}`);
+  } catch (error) {
+    logger.error(NAMESPACE, 'post delete id', error);
+    response.status(500).send(error);
+  }
+});
+
+app.use(cors());
+
+(async () => {
+  try {
+    await gameDb.connectDb();
+    logger.info(NAMESPACE, 'connect db success');
+    if (process.env.NODE_ENV === 'production') {
+      // await bot.launch({
+      //   webhook: {
+      //     domain: process.env.WEBHOOK_URL!,
+      //     port: +process.env.WEBHOOK_PORT!,
+      //     hookPath: '/webhook/',
+      //   },
+      // });
+      logger.info(
+        NAMESPACE,
+        `The bot ${bot?.botInfo?.username} is running on server`,
+      );
+
       app.use(express.json());
-      app.use(bot.webhookCallback('/' + config.botApiKey));
-
-
+      //  app.use(bot.webhookCallback('/webhook/' + config.botApiKey));
+      app.use('/web', router);
+      app
+        .use(await bot.createWebhook({ domain: process.env.WEBHOOK_URL! }))
+        .listen(+process.env.PORT! || 8000);
+      // web
     } else {
-      bot
-        .launch()
-        .then(() => logger.info(NAMESPACE, `The bot ${bot?.botInfo?.username} is running in polling mode`));
-    }
-  })
-  .catch((err) => logger.error(NAMESPACE, err));
+      app.listen(+process.env.PORT! || 8000);
+      await bot.launch({});
 
+      logger.info(
+        NAMESPACE,
+        `The bot ${bot?.botInfo?.username} is running in polling mode`,
+      );
+    }
+  } catch (error) {
+    logger.error(NAMESPACE, error);
+  }
+})();
