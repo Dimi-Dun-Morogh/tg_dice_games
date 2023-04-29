@@ -4,7 +4,6 @@ import bot from 'bot/bot';
 import gameDb from 'db/index';
 import * as dotenv from 'dotenv';
 dotenv.config();
-import config from './config';
 import { waiter } from 'helpers/utils';
 import cors from 'cors';
 
@@ -42,35 +41,26 @@ router.delete('/:id', async (request: Request, response: Response) => {
 });
 
 app.use(cors());
+app.use('/web', router);
 
 (async () => {
   try {
     await gameDb.connectDb();
     logger.info(NAMESPACE, 'connect db success');
     if (process.env.NODE_ENV === 'production') {
-      // await bot.launch({
-      //   webhook: {
-      //     domain: process.env.WEBHOOK_URL!,
-      //     port: +process.env.WEBHOOK_PORT!,
-      //     hookPath: '/webhook/',
-      //   },
-      // });
       logger.info(
         NAMESPACE,
         `The bot ${bot?.botInfo?.username} is running on server`,
       );
 
       app.use(express.json());
-      //  app.use(bot.webhookCallback('/webhook/' + config.botApiKey));
-      app.use('/web', router);
+
       app
         .use(await bot.createWebhook({ domain: process.env.WEBHOOK_URL! }))
         .listen(+process.env.PORT! || 8000);
-      // web
     } else {
       app.listen(+process.env.PORT! || 8000);
       await bot.launch({});
-
       logger.info(
         NAMESPACE,
         `The bot ${bot?.botInfo?.username} is running in polling mode`,
