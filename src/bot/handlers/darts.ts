@@ -5,7 +5,6 @@ import darts from 'bot/helpers/game';
 import { Game, Player } from 'db/models';
 import gameDb from 'db/index';
 import { waiter } from 'helpers/utils';
-import Darts from 'bot/helpers/game';
 
 const NAMESPACE = 'handlers_darts';
 
@@ -99,8 +98,10 @@ export const playerDecline = async (ctx: Context) => {
     if (!('data' in ctx.callbackQuery!)) return;
     const { from, data, message } = ctx.callbackQuery!;
     const presserId = from.id;
+    const userName = '@'+from.username;
     const buttonId = data.slice(14);
-    if (presserId !== +buttonId) {
+
+    if (presserId !== +buttonId && userName !== buttonId) {
       return await ctx.answerCbQuery('Эта кнопка не для вас', {});
     }
     return await ctx.deleteMessage(message?.message_id);

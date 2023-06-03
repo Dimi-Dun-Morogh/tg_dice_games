@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import config from "config/";
 import GameCollection, {
   Game,
-  Player,
   PlayerRating,
   PlayerRatingM,
 } from "db/models";
@@ -22,7 +21,6 @@ class GameDb {
 
   async createGame(gameObj: Game) {
     try {
-      // тут прочекать сколько минут назад была создана игра или был последний ход
       const ifExists = await this.readGame(gameObj.chat_id);
       if (ifExists) return false;
       const data = await GameCollection.create(gameObj);
@@ -43,7 +41,6 @@ class GameDb {
 
   async updateGame(id: number, data: Game) {
     try {
-      console.log("updating data", data.players);
       await GameCollection.updateOne({ chat_id: id }, data, { upsert: true });
       const gameUpdated = await GameCollection.findOne({ chat_id: id });
       return gameUpdated;
